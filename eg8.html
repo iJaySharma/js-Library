@@ -1,0 +1,109 @@
+ <!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<title>AJAX</title>
+
+<style>
+</style>
+<script> 
+//TMJRock part starts here
+function $$$(parameter){
+alert(parameter);
+return {
+"isValid": function(info)
+{
+alert(info);
+//var information=JSON.parse(info);
+//alert(information);
+}
+
+};
+
+}
+
+//TMJRock part ends here
+//TMJRock user parts starts here
+function doSomething()
+{
+return $$$("someForm").isValid({
+"nm":{
+"required":true,
+"max-length":20,
+"error-pane":"nmErrorSection",
+"errors":{
+"required":"Name required",
+"max-length":"Name cannot exceed 20 characters"
+}
+},
+"ad":{
+"required":true,
+"error-pane":"adErrorSection",
+"errors":{
+"required":"Address required"
+}
+},
+"ct":{
+"required":true,
+"error-pane":"ctErrorSection",
+"errors":{
+"required":"Select city"
+}
+},
+"gender":{
+"invalid":-1,
+"error-pane":"genderErrorSection",
+"errors":{
+"invalid":"Select gender"
+}
+},
+"agree":{
+"required-state":true,
+"display-alert":true,
+"errors":{
+"required":"Select I Agree checkbox"
+}
+}
+});
+}
+
+//TMJRock user parts ends here
+</script>
+</head>
+
+<body>
+<h1>TMJRock Validation</h1>
+
+<form id='someForm' action='whatever' onsubmit='return doSomething()'>
+Name : <input type='text' name='nm' id='nm'>
+<span id='nmErrorSection'></span><br>
+Address : <textarea name='ad' id='ad'></textarea>
+<span id='adErrorSection'></span><br>
+Select City : <select id='ct' name='ct'> 
+<option value='-1'>Select city</option>
+<option value='1'>Ujjain</option>
+<option value='2'>Dewas</option>
+<option value='3'>Indore</option>
+</select><span id='ctErrorSection'></span><br>
+Gender :&nbsp;&nbsp;&nbsp;
+Male <input type='radio' name='gender' id='ml' value='M'>
+&nbsp;&nbsp;&nbsp;&nbsp;
+Female <input type='radio' name='gender' id='fl' value='F'>
+&nbsp;&nbsp;&nbsp;
+<span id='genderErrorSection'></span><br>
+Is Indian ?  <input type='checkbox' name='agree' id='ag' value='Y'>
+<br>
+<Button type='submit'>Register</button>
+</form>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+

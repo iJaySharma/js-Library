@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<title>AJAX EXAMPLE</title>
+<script>
+
+
+
+
+//TMJRock starts here
+function $$$(cid)
+{
+let element=document.getElementById(cid);
+if(!element) throw "Invalid id :"+cid;
+return new TMJRockElement(element);
+}// $$$ function ends
+
+$$$.model={
+"onStartup":[],
+"accordians":[]
+}
+
+$$$.accordianHeadingClicked=function(accordianIndex,panelIndex)
+{
+
+//done done
+if($$$.model.accordians[accordianIndex].expandedIndex!=-1) $$$.model.accordians[accordianIndex].panels[$$$.model.accordians[accordianIndex].expandedIndex].style.display='none';
+$$$.model.accordians[accordianIndex].panels[panelIndex+1].style.display=$$$.model.accordians[accordianIndex].panels[panelIndex+1].oldDisplay;
+$$$.model.accordians[accordianIndex].expandedIndex=panelIndex+1;
+
+}
+$$$.toAccordian=function(accord)
+{
+
+let panels=[];
+let expandedIndex=-1;
+ 
+
+let children=accord.childNodes;
+let x;
+for(x=0;x<children.length;x++)
+{
+if(children[x].nodeName=="H3")
+{
+panels[panels.length]=children[x];
+}
+if(children[x].nodeName=="DIV")
+{
+panels[panels.length]=children[x];
+}
+}
+if(panels.length%2!=0) throw "Heading and division malformed to create according";
+for(x=0;x<panels.length;x+=2)
+{
+if(panels[x].nodeName!="H3") throw "Heading and division malformed to create according";
+if(panels[x+1].nodeName!="DIV") throw "Heading and division malformed to create according";
+}
+function createClickHandler(accordianIndex,panelIndex)
+{
+return function(){
+$$$.accordianHeadingClicked(accordianIndex,panelIndex);
+};
+}
+
+let accordianIndex=$$$.model.accordians.length;
+for(x=0;x<panels.length;x+=2)
+{
+panels[x].onclick=createClickHandler(accordianIndex,x);
+panels[x+1].oldDisplay=panels[x+1].style.display;
+panels[x+1].style.display="none";
+}
+
+$$$.model.accordians[accordianIndex]={
+"panels": panels,
+"expandedIndex": -1
+};
+
+}
+$$$.onDocumentLoaded=function(func){
+if((typeof func)!="function") throw "Expected function, found"+(typeof func)+"is call to onDocumentLoaded";
+$$$.model.onStartup[$$$.model.onStartup.length]=func;
+}
+$$$.initFramework=function(){
+let allTags=document.getElementsByTagName("*");
+let i=0;
+let t=null;
+let a=null;
+for(i=0;i<allTags.length;i++)
+{
+t=allTags[i];
+if(t.hasAttribute("accordian"))
+{
+a=t.getAttribute("accordian");
+if(a=="true")
+{
+$$$.toAccordian(t);
+
+}
+//done done
+}
+}
+
+
+
+
+let x=0;
+while(x<$$$.model.onStartup.length)
+{
+$$$.model.onStartup[x]();
+x++;
+}
+}
+
+
+window.addEventListener('load',function(){
+$$$.initFramework();
+
+});
+
+function TMJRockElement(element)
+{
+this.element=element;
+this.html=function(content)
+{
+if(typeof this.element.innerHTML=="string")
+{
+if(typeof content=="string")
+{
+this.element.innerHTML=content;
+}//if ends
+return this.element.innerHTML;
+}//if ends
+return null;
+}//html function ends here
+this.value=function(content)
+{
+if(typeof this.element.value)
+{
+if(typeof content=="string")
+{
+this.element.value=content;
+}
+return this.element.value;
+}
+return null;
+}//html function ends here
+this.fillComboBox=function(jsonObject)
+{
+
+if(this.element.nodeName!="SELECT") throw "fillComboBox can be called on Select type object only";
+
+//validate if dataSource, text and values properties exist
+//if dataSource exist then there sould a collection against it
+//if text properties exist it should be of string type
+//if value properties exist it should be of string type
+//if text properties exists and if it is of string type then that should be part of dataSource element
+//if value property exist and if it is of string type then that should be part of dataSource element
+//if first option is sepecified the it should have 2 properties of String type text and value, check for that 
+//clear all existing option from select
+//if firstoption exists,create  option tag and append it to SELECT
+//Traverse the dataSource array and on every cycle create option tag and append it to SELECT 
+
+}//fill comboBox ends
+}// class tmjrockElement ends here
+$$$.ajax=function(jsonObject)
+{
+if(!jsonObject["url"]) throw "url property is missing in call to ajax";
+let url=jsonObject["url"];
+if((typeof url)!="string") throw "url property should be of string type in call to ajax"
+let methodType="GET";
+if(jsonObject["methodType"])
+{
+methodType=jsonObject["methodType"]
+if((typeof methodType)!="string") throw "method type property should be of string type in call to ajax";
+methodType=methodType.toUpperCase();
+if(["GET","POST"].includes(methodType)==false) throw "methodType should be GET/POST in call to ajax";
+}
+let onSuccess=null;
+if(jsonObject["success"])
+{
+onSuccess=jsonObject["success"];
+if((typeof onSuccess)!="function") throw "Success property should be a function in call to ajax";
+}
+let onFailure=null;
+if(jsonObject["failure"])
+{
+onFailure=jsonObject["failure"];
+if((typeof onFailure)!="function") throw "Failure property should be a function in call to ajax";
+}
+if(methodType=="GET")
+{
+var xmlHttpRequest=new XMLHttpRequest();
+xmlHttpRequest.onreadystatechange=function(){
+if(this.readyState==4)
+{
+if(this.status==200)
+{
+var responseData=this.responseText;
+if(onSuccess) onSuccess(responseData);
+}
+//if ends
+else
+{
+if(onFailure) onFailure();
+}
+}//upper if ends
+};
+if(jsonObject["data"])
+{
+let jsonData=jsonObject["data"];
+let queryString="";
+let qsName;
+let qsValue;
+let xx=0;
+//we will change the code to travel the json object
+for(k in jsonData)
+{
+if(xx==0) queryString="?";
+if(xx>0) queryString+="&";
+xx++;
+qsName=encodeURI(k);
+qsValue=encodeURI(jsonData[k]);
+queryString=queryString+qsName+"="+qsValue;
+}
+url+=queryString;
+}
+xmlHttpRequest.open(methodType,url,true);
+xmlHttpRequest.send();
+ }//get part ends here
+if(methodType=="POST")
+{
+var xmlHttpRequest=new XMLHttpRequest();
+xmlHttpRequest.onreadystatechange=function(){
+if(this.readyState==4)
+{
+if(this.status==200)
+{
+var responseData=this.responseText;
+if(onSuccess) onSuccess(responseData);
+}
+//if ends
+else
+{
+if(onFailure) onFailure();
+}
+}//upper if ends
+};
+let jsonData={};
+let sendJSON=jsonObject["sendJSON"];
+if(!sendJSON) sendJSON=false;
+if((typeof sendJSON)!="boolean") throw "sendJSON property should be of boolean type in ajax call";
+let queryString="";
+if(jsonObject["data"])
+{
+if(sendJSON)
+{
+jsonData=jsonObject["data"];
+}
+else
+{
+queryString="";
+let qsName;
+let qsValue;
+let xx=0;
+//we will change the code to travel the json object
+for(k in jsonData)
+{
+//if(xx==0) queryString="?";
+if(xx>0) queryString+="&";
+xx++;
+qsName=encodeURI(k);
+qsValue=encodeURI(jsonData[k]);
+queryString=queryString+qsName+"="+qsValue;
+}
+}
+xmlHttpRequest.open('POST',url,true);
+if(sendJSON)
+{
+xmlHttpRequest.setRequestHeader("Content-Type","application/json");
+xmlHttpRequest.send(JSON.stringify(jsonData));
+}else
+{
+//what will be written over here to set request header
+xmlHttpRequest.send(queryString);
+}
+}
+}//post part ends here
+}//tmjrock part ends here
+
+
+
+
+
+
+/*
+var panels=[];
+var expandedIndex=-1;
+function accordianHeadingClicked(x)
+{
+if(expandedIndex!=-1) panels[expandedIndex].style.display='none';
+panels[x+1].style.display=panels[x+1].oldDisplay;
+expandedIndex=x+1;
+}
+function doit()
+{
+let accord=document.getElementById("mymy");
+let children=accord.childNodes;
+let x;
+for(x=0;x<children.length;x++)
+{
+//alert(child[x].nodeName);
+if(children[x].nodeName=="H3")
+{
+panels[panels.length]=children[x];
+}
+if(children[x].nodeName=="DIV")
+{
+panels[panels.length]=children[x];
+}
+}
+if(panels.length%2!=0) throw "Heading and division malformed to create according";
+for(x=0;x<panels.length;x+=2)
+{
+if(panels[x].nodeName!="H3") throw "Heading and division malformed to create according";
+if(panels[x+1].nodeName!="DIV") throw "Heading and division malformed to create according";
+}
+function createClickHandler(i)
+{
+return function(){
+accordianHeadingClicked(i);
+};
+}
+for(x=0;x<panels.length;x+=2)
+{
+panels[x].onclick=createClickHandler(x);
+panels[x+1].oldDisplay=panels[x+1].style.display;
+panels[x+1].style.display="none";
+}
+}
+window.addEventListener('load',doit);
+*/
+
+</script>
+</head>
+<body>
+<div accordian="true">
+<h3>Heading 1</h3>
+<div>
+1 whatever whatever
+2 whatever whatever
+3 whatever whatever
+4 whatever whatever
+5 whatever whatever
+6 whatever whatever
+7 whatever whatever
+</div>
+<h3>Heading 2</h3>
+<div>
+11 whatever whatever
+22 whatever whatever
+33 whatever whatever
+44 whatever whatever
+55 whatever whatever
+66 whatever whatever
+77 whatever whatever
+</div>
+<h3>Heading 3</h3>
+<div>
+111 whatever whatever
+222 whatever whatever
+333 whatever whatever
+4444 whatever whatever
+555 whatever whatever
+666 whatever whatever
+777 whatever whatever
+</div>
+</div>
+
+<div accordian="true">
+<h3>Heading 1000</h3>
+<div>
+1 whatever whatever
+2 whatever whatever
+3 whatever whatever
+4 whatever whatever
+5 whatever whatever
+6 whatever whatever
+7 whatever whatever
+</div>
+<h3>Heading 2000</h3>
+<div>
+11 whatever whatever
+22 whatever whatever
+33 whatever whatever
+44 whatever whatever
+55 whatever whatever
+66 whatever whatever
+77 whatever whatever
+</div>
+<h3>Heading 3000</h3>
+<div>
+111 whatever whatever
+222 whatever whatever
+333 whatever whatever
+4444 whatever whatever
+555 whatever whatever
+666 whatever whatever
+777 whatever whatever
+</div>
+</div>
+</body>
+</html>

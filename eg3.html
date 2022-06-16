@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<title>AJAX Examples</title>
+<script>
+//TMJRock part starts here 
+
+function $$$(cid){
+let element=document.getElementById(cid);
+if(!element) throw "Invalid id : "+cid;
+	//alert(typeof element);
+	//alert(element.toString());
+return new TMJRockElement(element);
+}
+
+function TMJRockElement(element)
+{
+this.element=element;
+this.html=function(content){
+if(typeof this.element.innerHTML=="string")
+{
+if((typeof content)=="string")
+{
+this.element.innerHTML=content;
+}
+return this.element.innerHTML;
+}
+return null;
+}//html function ends
+
+this.value=function(content){
+if(typeof this.element.value)
+{
+if((typeof content)=="string")
+{
+this.element.value=content;
+}
+return this.element.value;
+}
+return null;
+}//value function ends
+}//TMJRockElement class ends
+
+$$$.ajax=function(jsonObject)
+{
+if(!jsonObject["url"]) throw "url property is missing in call to ajax";
+let url=jsonObject["url"];
+if((typeof url)!="string") throw "url property should be of string type in call to ajax";
+let methodType="GET"; 
+if(jsonObject["methodType"])
+{
+methodType=jsonObject["methodType"];
+if((typeof methodType)!="string") throw "methodType property should be of string type in call to ajax";
+methodType=methodType.toUpperCase();
+if(["GET","POST"].includes(methodType)==false) throw "methodType should be of GET/POST in call to ajax";
+}
+
+let onSuccess=null;
+if(jsonObject["success"])
+{
+onSuccess=jsonObject["success"];
+if((typeof onSuccess)!="function") throw "success property should be a function in call to ajax";
+}
+
+let onFailure=null;
+if(jsonObject["failure"])
+{
+onFailure=jsonObject["failure"];
+if((typeof onFailure)!="function") throw "success property should be a function in call to ajax";
+}
+
+if(methodType=="GET")
+{
+var xmlHttpRequest=new XMLHttpRequest();
+xmlHttpRequest.onreadystatechange=function(){
+if(this.readyState==4)
+{
+if(this.status==200)
+{
+var responseData=this.responseText;
+if(onSuccess) onSuccess(responseData);
+}
+else
+{
+if(onFailure) onFailure();
+}
+}
+};
+
+if(jsonObject["data"])
+{
+let jsonData=jsonObject["data"];
+let queryString="";
+let qsName;
+let qsValue;
+let xx=0;
+for(k in jsonData)
+{
+if(xx==0) queryString="?";   
+if(xx>0) queryString+="&";
+xx++;
+qsName=encodeURI(k);
+qsValue=encodeURI(jsonData[k]);
+queryString=queryString+qsName+"="+qsValue;
+}
+url+=queryString;
+}
+xmlHttpRequest.open(methodType,url,true);
+xmlHttpRequest.send();
+}//get part ends here
+
+if(methodType=="POST")
+{
+var xmlHttpRequest=new XMLHttpRequest();
+xmlHttpRequest.onreadystatechange=function(){
+if(this.readyState==4)
+{
+if(this.status==200)
+{
+var responseData=this.responseText;
+if(onSuccess) onSuccess(responseData);
+}
+else
+{
+if(onFailure) onFailure();
+}
+}
+};
+
+let jsonData={};
+let sendJSON=jsonObject["sendJSON"];
+if(!sendJSON) sendJSON=false;
+if((typeof sendJSON)!="boolean") throw "sendJSON property should be of boolean type in ajax call";
+let queryString="";
+if(jsonObject["data"])
+{
+if(sendJSON)
+{
+jsonData=jsonObject["data"];
+}
+else
+{
+queryString;
+let qsName;
+let qsValue;
+let xx=0;
+for(k in jsonData)
+{
+//if(xx==0) queryString="?";   
+if(xx>0) queryString+="&";
+xx++;
+qsName=encodeURI(k);
+qsValue=encodeURI(jsonData[k]);
+queryString=queryString+qsName+"="+qsValue;
+}
+} 
+}
+xmlHttpRequest.open(methodType,url,true);
+if(sendJSON)
+{
+xmlHttpRequest.setRequestHeader("Content-Type","application/json");
+xmlHttpRequest.send(JSON.stringify(jsonData));
+}
+else
+{
+// what will be written here to setRequestHeader
+http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xmlHttpRequest.send(queryString);
+}
+}//post part ends here
+
+}//$$$.ajax ends
+
+   
+//TMJRock part ends here 
+
+function saveEnquiry()
+{
+var firstName=$$$("firstName").value();
+var lastName=$$$("lastName").value();
+var age=$$$("age").value();
+
+var customer={
+"firstName" : firstName,
+"lastName" : lastName,
+"age" : age
+};
+
+var whatever=$$$("whatever");
+whatever.html("");
+$$$.ajax({
+"methodType": "POST",
+"url": "servletThree",
+"sendJSON": true,
+"data": customer,
+"success": function(responseData){
+var customer=JSON.parse(responseData)
+var a="First Name : "+customer.firstName+"<br>";
+a=a+"Last Name : "+customer.lastName+"<br>";
+a=a+"Age : "+customer.age;
+whatever.html(a);
+},
+"failure": function(){
+alert("Some Problem");
+} 
+});
+}
+
+
+
+</script>
+</head>
+<body>
+<h1>Post type request</h1>
+First name <input type='text' id='firstName'><br>
+Last name <input type='text' id='lastName'><br>
+Age<input type='text' id='age'><br>
+<button type='button' onclick='saveEnquiry()'>Save</button>
+<br>
+<div id='whatever'></div>
+<br>
+<a href='index.html'>Home</a>
+</body>
+</html> 

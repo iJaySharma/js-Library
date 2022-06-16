@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<title> AJAX Examples</title>
+<script>
+
+//TMJRock part starts here
+function $$$(cid)
+{
+let element=document.getElementById(cid);
+if(!element) throw "Invalid id :"+cid;
+return new TMJRockElement(element);
+}// $$$ function ends
+function TMJRockElement(element)
+{
+this.element=element;
+this.html=function(content)
+{
+if(typeof this.element.innerHTML=="string")
+{
+if(typeof content=="string")
+{
+this.element.innerHTML=content;
+}//if ends
+return this.element.innerHTML;
+}//if ends
+return null;
+}//html function ends here
+this.value=function(content)
+{
+if(typeof this.element.value)
+{
+if(typeof content=="string")
+{
+this.element.value=content;
+}
+return this.element.value;
+}
+return null;
+}
+}// class tmjrockElement ends here
+
+$$$.ajax=function(jsonObject)
+{
+if(!jsonObject["url"]) throw "url property is missing in call to ajax";
+let url=jsonObject["url"];
+if((typeof url)!="string") throw "url property should be of string type in call to ajax"
+let methodType="GET";
+if(jsonObject["methodType"])
+{
+methodType=jsonObject["methodType"]
+if((typeof methodType)!="string") throw "method type property should be of string type in call to ajax";
+methodType=methodType.toUpperCase();
+if(["GET","POST"].includes(methodType)==false) throw "methodType should be GET/POST in call to ajax";
+}
+let onSuccess=null;
+if(jsonObject["success"])
+{
+onSuccess=jsonObject["success"];
+if((typeof onSuccess)!="function") throw "Success property should be a function in call to ajax";
+}
+let onFailure=null;
+if(jsonObject["failure"])
+{
+onFailure=jsonObject["failure"];
+if((typeof onFailure)!="function") throw "Failure property should be a function in call to ajax";
+}
+if(methodType=="GET")
+{
+var xmlHttpRequest=new XMLHttpRequest();
+xmlHttpRequest.onreadystatechange=function(){
+if(this.readyState==4)
+{
+if(this.status==200)
+{
+var responseData=this.responseText;
+if(onSuccess) onSuccess(responseData);
+}
+//if ends
+else
+{
+if(onFailure) onFailure();
+}
+}//upper if ends
+};
+
+xmlHttpRequest.open(methodType,url,true);
+xmlHttpRequest.send();
+ }//get part ends here
+if(methodType=="POST")
+{
+
+}
+}
+//tmjrock part ends here
+
+function getDesignation()
+{
+let titleSpan=$$$("title");
+titleSpan.html("");
+let code=$$$("code").value(); 
+$$$.ajax({
+"url": "servletTwo?code="+encodeURI(code),
+"methodType": "GET",
+"success": function(responseData){
+if(responseData=="INVALID")
+{
+alert("Invalid designation code");
+}else
+{
+var splits=responseData.split(",");
+titleSpan.html(splits[1]);
+}
+},
+"failure": function(){
+alert("Some problem");
+}
+});
+}
+
+</script>
+</head>
+<body>
+<h1>Get type request with data Example</h1>
+Enter code <input type='text' id='code'>
+<button type='button' onclick='getDesignation()'>Get Designation</button><br> 
+<br>
+<h2> 
+Title :   <span id='title'></span>
+</h2>
+<br>
+<a href='index.html'>Home</a>
+</body>
+</html>
