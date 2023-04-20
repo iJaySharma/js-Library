@@ -179,9 +179,6 @@ Is Indian ?  <input type='checkbox' name='agree' id='ag' value='Y'>
 </html>
  ```
 
-## Note :
-first of all please go through the examples for clarification you would find the way functions are working and how we are placing calls according to function requirement.<br>
-So if one can want to use the facility of modal and accordian simultaneously refer the module in which i give you explanation how we can do that<br>
-Apart from this one of the key feature of library is grid for now it is demonstrated by an example of student grid along with thier details go through the module to understand what it is about and how it works.
+
 
 
